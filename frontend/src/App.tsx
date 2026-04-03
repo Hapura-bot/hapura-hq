@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuthContext } from './AuthContext'
 import { CommandNav } from './components/layout/CommandNav'
+import ARIAChat from './components/aria/ARIAChat'
 import DashboardPage from './pages/DashboardPage'
 import RevenueBoardPage from './pages/RevenueBoardPage'
 import AgentCouncilPage from './pages/AgentCouncilPage'
@@ -42,6 +43,7 @@ function AppShell() {
       <footer className="border-t border-dark-600 py-3 flex justify-center">
         <span className="text-xs font-mono text-slate-700 tracking-widest">HAPURA COMMAND CENTER v1.0</span>
       </footer>
+      <ARIAChat />
     </div>
   )
 }

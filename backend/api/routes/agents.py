@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException, Header
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException, Header, Request
 from firebase_admin import firestore
 from api.deps import get_current_user
 from datetime import datetime
@@ -191,6 +191,21 @@ async def trigger_agent(
     }
 
 
+@router.post("/hq_assistant/chat", response_model=dict)
+async def aria_chat(
+    request: Request,
+    uid: str = Depends(get_current_user),
+):
+    """Send a message to ARIA and get a reply. Used by web UI."""
+    body = await request.json()
+    message = (body.get("message") or "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="message required")
+    from agents.hq_assistant import run_aria
+    reply = run_aria(message, chat_id=f"web:{uid}")
+    return {"reply": reply}
+
+
 @router.get("/hq_assistant/conversations", response_model=list[dict])
 async def get_aria_conversations(
     uid: str = Depends(get_current_user),
@@ -198,9 +213,7 @@ async def get_aria_conversations(
 ):
     """Get ARIA conversation history for display in frontend."""
     from agents.hq_assistant import get_conversation_history
-    from config import get_settings
-    s = get_settings()
-    return get_conversation_history(s.telegram_chat_id, limit=limit)
+    return get_conversation_history(f"web:{uid}", limit=limit)
 
 
 @router.post("/schedule/{agent_id}", response_model=dict, status_code=202)

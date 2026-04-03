@@ -8,4 +8,5 @@ python-multipart==0.0.20
 firebase-admin==6.6.0
 google-auth==2.35.0
 google-auth-httplib2==0.2.0
-praisonaiagents>=1.5.0
+praisonaiagents[llm]>=1.5.0
+openai>=1.0.0
