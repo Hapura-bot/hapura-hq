@@ -12,8 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 def _setup_llm():
+    import litellm
     from config import get_settings
     s = get_settings()
+    if not getattr(litellm, "_hapura_stream_patched", False):
+        _orig = litellm.completion
+        def _completion_no_stream(*args, **kwargs):
+            kwargs["stream"] = False
+            return _orig(*args, **kwargs)
+        litellm.completion = _completion_no_stream
+        litellm._hapura_stream_patched = True
     if s.openai_api_key:
         os.environ["OPENAI_API_KEY"]   = s.openai_api_key
         os.environ["OPENAI_BASE_URL"]  = s.openai_base_url

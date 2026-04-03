@@ -32,7 +32,10 @@ Quy tắc trả lời:
 - Nếu không có data → nói thật, đừng bịa
 - Nếu anh muốn trigger agent, ghi [TRIGGER:health_checker] hoặc [TRIGGER:strategist] v.v. ở CUỐI reply
 
-Khi anh hỏi về trigger agents, các agent_id hợp lệ: health_checker, strategist, bug_detective, revenue_forecaster"""
+Khi anh hỏi về trigger agents, các agent_id hợp lệ: health_checker, strategist, bug_detective, revenue_forecaster, aso_analyst, content_strategist, competitor_watcher, director
+
+Khi anh gửi "approve" hoặc "duyệt" → tìm Weekly Directive mới nhất đang draft và approve nó, dùng [APPROVE_DIRECTIVE] ở cuối reply.
+Khi anh hỏi về Weekly Directive → đọc từ Firestore collection command_directives và tóm tắt."""
 
 
 def _setup_openai():
@@ -159,12 +162,38 @@ def _trigger_agent(agent_id: str) -> str:
         return "failed"
 
 
-def _parse_triggers(text: str) -> tuple[str, list[str]]:
-    """Tách [TRIGGER:agent_id] tags ra khỏi reply text."""
+def _approve_latest_directive(approved_by: str = "telegram_ceo") -> str:
+    """Approve the latest draft directive in Firestore."""
+    try:
+        from firebase_admin import firestore
+        from datetime import datetime
+        db = firestore.client()
+        docs = list(
+            db.collection("command_directives")
+            .where("status", "==", "draft")
+            .limit(5)
+            .stream()
+        )
+        docs.sort(key=lambda d: d.to_dict().get("generated_at", ""), reverse=True)
+        if not docs:
+            return "no_draft_directive"
+        ref = docs[0].reference
+        now = datetime.utcnow().isoformat()
+        ref.update({"status": "active", "approved_by": approved_by, "approved_at": now})
+        return docs[0].id
+    except Exception as e:
+        logger.warning(f"ARIA approve directive error: {e}")
+        return "failed"
+
+
+def _parse_triggers(text: str) -> tuple[str, list[str], bool]:
+    """Tách [TRIGGER:agent_id] và [APPROVE_DIRECTIVE] tags ra khỏi reply text."""
     import re
     triggers = re.findall(r"\[TRIGGER:(\w+)\]", text)
-    clean = re.sub(r"\s*\[TRIGGER:\w+\]", "", text).strip()
-    return clean, triggers
+    approve = bool(re.search(r"\[APPROVE_DIRECTIVE\]", text))
+    clean = re.sub(r"\s*\[TRIGGER:\w+\]", "", text)
+    clean = re.sub(r"\s*\[APPROVE_DIRECTIVE\]", "", clean).strip()
+    return clean, triggers, approve
 
 
 def run_aria(user_message: str, chat_id: str) -> str:
@@ -200,14 +229,24 @@ def run_aria(user_message: str, chat_id: str) -> str:
         raw_reply = "Em xin lỗi, gặp lỗi khi xử lý. Anh thử lại sau nhé."
 
     # 5. Parse & execute triggers
-    clean_reply, triggers = _parse_triggers(raw_reply)
+    clean_reply, triggers, approve_directive = _parse_triggers(raw_reply)
 
     trigger_notes = []
-    valid_agents = {"health_checker", "strategist", "bug_detective", "revenue_forecaster"}
+    valid_agents = {"health_checker", "strategist", "bug_detective", "revenue_forecaster",
+                    "aso_analyst", "content_strategist", "competitor_watcher", "director"}
     for agent_id in triggers:
         if agent_id in valid_agents:
             run_id = _trigger_agent(agent_id)
             trigger_notes.append(f"⚡ Đã kích hoạt **{agent_id}** (run: `{run_id[:8]}...`)")
+
+    if approve_directive:
+        directive_id = _approve_latest_directive(approved_by=f"telegram:{chat_id}")
+        if directive_id not in ("failed", "no_draft_directive"):
+            trigger_notes.append(f"✅ Weekly Directive đã được APPROVE (ID: `{directive_id[:8]}...`)")
+        elif directive_id == "no_draft_directive":
+            trigger_notes.append("⚠️ Không tìm thấy directive đang chờ duyệt")
+        else:
+            trigger_notes.append("❌ Lỗi khi approve directive")
 
     final_reply = clean_reply
     if trigger_notes:

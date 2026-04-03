@@ -8,6 +8,7 @@ env:
   PROJECT_ID: hapura-hq
   REGION: asia-southeast1
   SERVICE: hapura-command-backend
+  BACKEND_URL: https://hapura-command-backend-730131473012.asia-southeast1.run.app
 
 jobs:
   # ── Backend → Cloud Run ──────────────────────────────────────────────────────
@@ -37,20 +38,36 @@ jobs:
           TELEGRAM_CHAT_ID:         ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_WEBHOOK_SECRET:  ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
           WEBHOOK_SECRET:           ${{ secrets.WEBHOOK_SECRET }}
+          SCHEDULER_SECRET:         ${{ secrets.SCHEDULER_SECRET }}
           GH_API_TOKEN:             ${{ secrets.GH_API_TOKEN }}
         run: |
-          cat > /tmp/env.yaml << ENVEOF
+          cat > /tmp/env.yaml << 'ENVEOF'
           APP_ENV: production
           GCP_PROJECT_ID: hapura-hq
           GCP_REGION: asia-southeast1
           CORS_ORIGINS: '["https://hapura-hq.web.app","https://hq.hapura.vn"]'
+          OPENAI_BASE_URL: "https://vertex-key.com/api/v1"
+          LLM_MODEL: "openai/omega/claude-sonnet-4-6"
+          MODEL_HEALTH_CHECKER: "openai/lite/claude-haiku-4-5"
+          MODEL_BUG_DETECTIVE: "openai/omega/claude-sonnet-4-6"
+          MODEL_STRATEGIST: "openai/omega/claude-sonnet-4-6"
+          MODEL_REVENUE_FORECASTER: "openai/omega/claude-opus-4-6"
+          MODEL_ARIA: "openai/omega/claude-sonnet-4-6"
+          MODEL_DIRECTOR: "openai/omega/claude-opus-4-6"
+          MODEL_ASO_ANALYST: "openai/omega/claude-sonnet-4-6"
+          MODEL_CONTENT_STRATEGIST: "openai/omega/claude-sonnet-4-6"
+          MODEL_COMPETITOR_WATCHER: "openai/omega/claude-sonnet-4-6"
           OPENAI_API_KEY: "${OPENAI_API_KEY}"
           TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
           TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID}"
           TELEGRAM_WEBHOOK_SECRET: "${TELEGRAM_WEBHOOK_SECRET}"
           WEBHOOK_SECRET: "${WEBHOOK_SECRET}"
+          SCHEDULER_SECRET: "${SCHEDULER_SECRET}"
           GITHUB_TOKEN: "${GH_API_TOKEN}"
           ENVEOF
+          # Substitute env vars
+          envsubst < /tmp/env.yaml > /tmp/env-final.yaml
+          mv /tmp/env-final.yaml /tmp/env.yaml
 
       - name: Deploy to Cloud Run
         working-directory: backend
@@ -61,7 +78,8 @@ jobs:
             --project $PROJECT_ID \
             --allow-unauthenticated \
             --port 8099 \
-            --memory 512Mi \
+            --memory 1Gi \
+            --timeout 300 \
             --env-vars-file /tmp/env.yaml
 
       - name: Get service URL
@@ -96,6 +114,12 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_URL: ${{ needs.deploy-backend.outputs.url }}/api/v1
+          VITE_FIREBASE_API_KEY:              ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN:          ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID:           ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET:       ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID:  ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID:               ${{ secrets.VITE_FIREBASE_APP_ID }}
         run: npm run build
 
       - name: Deploy to Firebase Hosting
@@ -105,3 +129,69 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_HAPURA_HQ }}
           projectId: hapura-hq
           channelId: live
+
+  # ── Cloud Scheduler jobs ─────────────────────────────────────────────────────
+  setup-scheduler:
+    name: Setup Cloud Scheduler
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Create/update Cloud Scheduler jobs
+        env:
+          BACKEND: ${{ needs.deploy-backend.outputs.url }}
+          SECRET: ${{ secrets.SCHEDULER_SECRET }}
+        run: |
+          REGION=asia-southeast1
+          PROJECT=hapura-hq
+          HEADERS="Content-Type:application/json,X-Scheduler-Secret:${SECRET}"
+          BODY='{"triggered_by":"cloud_scheduler"}'
+
+          upsert_job() {
+            local NAME=$1 SCHEDULE=$2 URL=$3
+            if gcloud scheduler jobs describe "$NAME" --location=$REGION --project=$PROJECT &>/dev/null; then
+              gcloud scheduler jobs update http "$NAME" \
+                --location=$REGION --project=$PROJECT \
+                --schedule="$SCHEDULE" --uri="$URL" \
+                --message-body="$BODY" --headers="$HEADERS" \
+                --time-zone="Asia/Ho_Chi_Minh" --attempt-deadline=300s
+            else
+              gcloud scheduler jobs create http "$NAME" \
+                --location=$REGION --project=$PROJECT \
+                --schedule="$SCHEDULE" --uri="$URL" \
+                --message-body="$BODY" --headers="$HEADERS" \
+                --time-zone="Asia/Ho_Chi_Minh" --attempt-deadline=300s
+            fi
+          }
+
+          BASE="${BACKEND}/api/v1/scheduler"
+
+          # Daily agents (Vietnam time)
+          upsert_job "hapura-health-checker"    "0 8 * * *"    "${BASE}/agents/health_checker/run"
+          upsert_job "hapura-review-monitor"    "0 9 * * *"    "${BASE}/agents/review_monitor/run"
+          upsert_job "hapura-anomaly-detector"  "*/30 * * * *" "${BASE}/agents/anomaly_detector/run"
+
+          # Weekly agents
+          upsert_job "hapura-aso-analyst"       "0 9 * * 1"    "${BASE}/agents/aso_analyst/run"
+          upsert_job "hapura-bug-detective"     "0 9 * * 1"    "${BASE}/agents/bug_detective/run"
+          upsert_job "hapura-competitor"        "0 10 * * 3"   "${BASE}/agents/competitor_watcher/run"
+          upsert_job "hapura-content-strat"     "0 11 * * 3"   "${BASE}/agents/content_strategist/run"
+          upsert_job "hapura-strategist"        "0 9 * * 1"    "${BASE}/agents/strategist/run"
+          upsert_job "hapura-feature-prio"      "0 9 * * 5"    "${BASE}/agents/feature_prioritizer/run"
+
+          # Director (Tuesday 9am — after all Monday agents ran)
+          upsert_job "hapura-director"          "0 9 * * 2"    "${BASE}/director/run"
+
+          # Monthly agents (1st of month)
+          upsert_job "hapura-revenue-forecast"  "0 9 1 * *"    "${BASE}/agents/revenue_forecaster/run"
+          upsert_job "hapura-pricing-strat"     "0 9 1 * *"    "${BASE}/agents/pricing_strategist/run"
+          upsert_job "hapura-cost-optimizer"    "0 9 1 * *"    "${BASE}/agents/cost_optimizer/run"
+
+          echo "All scheduler jobs configured."

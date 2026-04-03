@@ -8,36 +8,50 @@ router = APIRouter(prefix="/agents", tags=["agents"])
 
 AGENT_IDS = ["health_checker", "strategist", "bug_detective", "revenue_forecaster", "hq_assistant"]
 
+# Extended IDs: all workspace agents that can be triggered
+WORKSPACE_AGENT_IDS = [
+    "director", "aso_analyst", "content_strategist", "competitor_watcher",
+    "feature_prioritizer", "release_planner", "pricing_strategist",
+    "conversion_analyst", "review_monitor", "retention_analyst", "support_draft",
+    "anomaly_detector", "dashboard_curator", "infra_monitor", "cost_optimizer",
+]
+ALL_AGENT_IDS = AGENT_IDS + WORKSPACE_AGENT_IDS
+
 AGENT_META = {
     "health_checker": {
         "name": "Health Checker",
         "role": "Daily: Ping tất cả Cloud Run endpoints, báo cáo latency và status",
         "schedule": "Daily 08:00 VN",
         "color": "neon-green",
+        "department": "product",
     },
     "strategist": {
         "name": "Strategist",
         "role": "Weekly: Phân tích GP scores, đề xuất focus project tuần tới",
         "schedule": "Monday 09:00 VN",
         "color": "neon-purple",
+        "department": "analytics",
     },
     "bug_detective": {
         "name": "Bug Detective",
         "role": "On-demand: Tổng hợp GitHub Issues và PRs quan trọng của 4 projects",
         "schedule": "On demand",
         "color": "neon-amber",
+        "department": "product",
     },
     "revenue_forecaster": {
         "name": "Revenue Forecaster",
         "role": "Monthly: Dự báo doanh thu tháng tới theo trend hiện tại",
         "schedule": "1st of month",
         "color": "brand",
+        "department": "revenue",
     },
     "hq_assistant": {
         "name": "ARIA",
         "role": "Trợ lý ảo của Victor — nắm rõ 4 dự án, chat qua Telegram 24/7",
         "schedule": "Always on",
         "color": "neon-cyan",
+        "department": "executive",
     },
 }
 
@@ -65,6 +79,9 @@ def _run_agent(agent_id: str, triggered_by: str, run_doc_id: str):
             result = run_revenue_forecast(triggered_by=triggered_by)
         elif agent_id == "hq_assistant":
             result = {"report": "ARIA is always on via Telegram. No scheduled run needed.", "result": "ok"}
+        elif agent_id in WORKSPACE_AGENT_IDS:
+            from workspace.department_runner import run_agent_by_id
+            result = run_agent_by_id(agent_id, triggered_by=triggered_by)
         else:
             result = {"error": "unknown agent"}
 
@@ -88,10 +105,15 @@ def _run_agent(agent_id: str, triggered_by: str, run_doc_id: str):
 @router.get("", response_model=list[dict])
 async def list_agents(uid: str = Depends(get_current_user)):
     """List all agents with their latest run info."""
+    from workspace.registry import WORKSPACE_AGENT_META
     db = _get_db()
     result = []
-    for agent_id in AGENT_IDS:
-        meta = AGENT_META[agent_id].copy()
+    all_meta = {**AGENT_META}
+    for aid, wmeta in WORKSPACE_AGENT_META.items():
+        if aid not in all_meta:
+            all_meta[aid] = wmeta
+    for agent_id in ALL_AGENT_IDS:
+        meta = all_meta.get(agent_id, {"name": agent_id, "role": "", "schedule": "", "color": "brand"}).copy()
         meta["id"] = agent_id
 
         # Get latest run
@@ -125,7 +147,7 @@ async def list_agent_runs(
     uid: str = Depends(get_current_user),
     limit: int = 10,
 ):
-    if agent_id not in AGENT_IDS:
+    if agent_id not in ALL_AGENT_IDS:
         raise HTTPException(status_code=404, detail="Agent not found")
     db = _get_db()
     docs = (
@@ -140,7 +162,7 @@ async def list_agent_runs(
 
 @router.get("/{agent_id}/runs/latest", response_model=dict)
 async def get_latest_run(agent_id: str, uid: str = Depends(get_current_user)):
-    if agent_id not in AGENT_IDS:
+    if agent_id not in ALL_AGENT_IDS:
         raise HTTPException(status_code=404, detail="Agent not found")
     db = _get_db()
     docs = list(
@@ -162,7 +184,7 @@ async def trigger_agent(
     uid: str = Depends(get_current_user),
 ):
     """Trigger an agent run. Returns immediately — run happens in background."""
-    if agent_id not in AGENT_IDS:
+    if agent_id not in ALL_AGENT_IDS:
         raise HTTPException(status_code=404, detail="Agent not found")
 
     db = _get_db()
@@ -227,7 +249,7 @@ async def schedule_agent(
     settings = get_settings()
     if x_scheduler_secret != settings.webhook_secret:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    if agent_id not in AGENT_IDS:
+    if agent_id not in ALL_AGENT_IDS:
         raise HTTPException(status_code=404, detail="Agent not found")
 
     db = _get_db()

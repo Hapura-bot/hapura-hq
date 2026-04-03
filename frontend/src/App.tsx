@@ -7,6 +7,9 @@ import DashboardPage from './pages/DashboardPage'
 import RevenueBoardPage from './pages/RevenueBoardPage'
 import AgentCouncilPage from './pages/AgentCouncilPage'
 import SprintPage from './pages/SprintPage'
+import WorkplacePage from './pages/WorkplacePage'
+import DepartmentPage from './pages/DepartmentPage'
+import DirectivesPage from './pages/DirectivesPage'
 import LoginPage from './pages/LoginPage'
 
 const queryClient = new QueryClient({
@@ -36,8 +39,11 @@ function AppShell() {
         <Routes>
           <Route path="/"        element={<DashboardPage />} />
           <Route path="/revenue" element={<RevenueBoardPage />} />
-          <Route path="/agents"  element={<AgentCouncilPage />} />
-          <Route path="/sprint"  element={<SprintPage />} />
+          <Route path="/workplace"          element={<WorkplacePage />} />
+          <Route path="/workplace/:deptId" element={<DepartmentPage />} />
+          <Route path="/directives"         element={<DirectivesPage />} />
+          <Route path="/agents"            element={<AgentCouncilPage />} />
+          <Route path="/sprint"            element={<SprintPage />} />
         </Routes>
       </div>
       <footer className="border-t border-dark-600 py-3 flex justify-center">
