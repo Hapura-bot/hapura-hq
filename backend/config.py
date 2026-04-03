@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # Telegram
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
+    telegram_webhook_secret: str = "aria-webhook-secret-change-me"
+    model_aria: str = "omega/claude-sonnet-4-6"
 
     class Config:
         env_file = _ENV_FILE

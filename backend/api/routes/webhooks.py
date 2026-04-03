@@ -1,9 +1,56 @@
-from fastapi import APIRouter, Request, HTTPException, Header
+from fastapi import APIRouter, Request, HTTPException, Header, BackgroundTasks
 from firebase_admin import firestore
 from config import get_settings
 from datetime import datetime, date
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
+
+
+# ── Telegram / ARIA ───────────────────────────────────────────────────────────
+
+async def _handle_aria(text: str, chat_id: str):
+    from agents.hq_assistant import run_aria
+    from agents.telegram import send_telegram_sync
+    s = get_settings()
+    try:
+        reply = run_aria(text, chat_id)
+    except Exception as e:
+        reply = f"⚠️ ARIA gặp lỗi: {str(e)[:200]}"
+    send_telegram_sync(s.telegram_bot_token, chat_id, reply)
+
+
+@router.post("/telegram")
+async def telegram_webhook(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    x_telegram_bot_api_secret_token: str = Header(None),
+):
+    """Receive updates from Telegram Bot API webhook."""
+    s = get_settings()
+    if x_telegram_bot_api_secret_token != s.telegram_webhook_secret:
+        raise HTTPException(status_code=403, detail="Invalid webhook secret")
+
+    body = await request.json()
+
+    # Extract message
+    message = body.get("message") or body.get("edited_message")
+    if not message:
+        return {"ok": True}  # Ignore non-message updates
+
+    text = message.get("text", "").strip()
+    chat_id = str(message.get("chat", {}).get("id", ""))
+    is_bot = message.get("from", {}).get("is_bot", False)
+
+    # Only process text messages from Victor (not bots)
+    if not text or is_bot or not chat_id:
+        return {"ok": True}
+
+    # Security: only Victor's chat
+    if chat_id != str(s.telegram_chat_id):
+        return {"ok": True}
+
+    background_tasks.add_task(_handle_aria, text, chat_id)
+    return {"ok": True}
 
 
 def _verify_secret(x_hapura_secret: str):

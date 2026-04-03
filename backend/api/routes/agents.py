@@ -6,7 +6,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
-AGENT_IDS = ["health_checker", "strategist", "bug_detective", "revenue_forecaster"]
+AGENT_IDS = ["health_checker", "strategist", "bug_detective", "revenue_forecaster", "hq_assistant"]
 
 AGENT_META = {
     "health_checker": {
@@ -33,6 +33,12 @@ AGENT_META = {
         "schedule": "1st of month",
         "color": "brand",
     },
+    "hq_assistant": {
+        "name": "ARIA",
+        "role": "Trợ lý ảo của Victor — nắm rõ 4 dự án, chat qua Telegram 24/7",
+        "schedule": "Always on",
+        "color": "neon-cyan",
+    },
 }
 
 
@@ -57,6 +63,8 @@ def _run_agent(agent_id: str, triggered_by: str, run_doc_id: str):
         elif agent_id == "revenue_forecaster":
             from agents.revenue_forecaster import run_revenue_forecast
             result = run_revenue_forecast(triggered_by=triggered_by)
+        elif agent_id == "hq_assistant":
+            result = {"report": "ARIA is always on via Telegram. No scheduled run needed.", "result": "ok"}
         else:
             result = {"error": "unknown agent"}
 
@@ -181,6 +189,18 @@ async def trigger_agent(
         "started_at": now,
         "message": f"Agent '{agent_id}' triggered. Poll /agents/{agent_id}/runs/latest for results.",
     }
+
+
+@router.get("/hq_assistant/conversations", response_model=list[dict])
+async def get_aria_conversations(
+    uid: str = Depends(get_current_user),
+    limit: int = 30,
+):
+    """Get ARIA conversation history for display in frontend."""
+    from agents.hq_assistant import get_conversation_history
+    from config import get_settings
+    s = get_settings()
+    return get_conversation_history(s.telegram_chat_id, limit=limit)
 
 
 @router.post("/schedule/{agent_id}", response_model=dict, status_code=202)
