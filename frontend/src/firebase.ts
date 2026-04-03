@@ -1,15 +1,15 @@
-import { initializeApp } from 'firebase/app'
+import { initializeApp, getApps, getApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY             || "AIzaSyDg2-J2J968oeKcbn08aieV6o-RqdJyVJQ",
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN         || "trendkr-hapura.firebaseapp.com",
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID          || "trendkr-hapura",
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET      || "trendkr-hapura.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "635022569271",
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID              || "1:635022569271:web:f43f874cc250b402e8f4b2",
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY             || "AIzaSyB7Eb7VJbY6hGGLeVzFNCT8lrOPHGCk5k8",
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN         || "hapura-hq.firebaseapp.com",
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID          || "hapura-hq",
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET      || "hapura-hq.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "553138370139",
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID              || "1:553138370139:web:d251766085a059916ef17e",
 }
 
-const app = initializeApp(firebaseConfig)
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()

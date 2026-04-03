@@ -27,7 +27,7 @@ function AppShell() {
     )
   }
 
-  if (!user) return <LoginPage />
+  if (!user && !import.meta.env.DEV) return <LoginPage />
 
   return (
     <div className="min-h-screen bg-dark-900 flex flex-col scanline">
