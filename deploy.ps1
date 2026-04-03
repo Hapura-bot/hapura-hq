@@ -1,6 +1,6 @@
 # Deploy Hapura Command Center to Cloud Run + Firebase Hosting
 param(
-  [string]$ProjectId      = "trendkr-hapura",
+  [string]$ProjectId      = "hapura-hq",
   [string]$Region         = "asia-southeast1",
   [string]$BackendService = "hapura-command-backend",
   [switch]$SetupScheduler
