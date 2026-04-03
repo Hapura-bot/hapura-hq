@@ -26,7 +26,12 @@ ALLOWED_EMAILS = {
 }
 
 
-async def get_current_user(authorization: str = Header(...)) -> str:
+async def get_current_user(authorization: str = Header(None)) -> str:
+    settings = get_settings()
+    if settings.app_env == "development" and not authorization:
+        return "dev"
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing authorization header")
     get_firebase_app()
     try:
         token = authorization.removeprefix("Bearer ")
