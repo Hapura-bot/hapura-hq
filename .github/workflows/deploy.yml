@@ -160,7 +160,7 @@ jobs:
               gcloud scheduler jobs update http "$NAME" \
                 --location=$REGION --project=$PROJECT \
                 --schedule="$SCHEDULE" --uri="$URL" \
-                --message-body="$BODY" --headers="$HEADERS" \
+                --message-body="$BODY" --update-headers="$HEADERS" \
                 --time-zone="Asia/Ho_Chi_Minh" --attempt-deadline=300s
             else
               gcloud scheduler jobs create http "$NAME" \
