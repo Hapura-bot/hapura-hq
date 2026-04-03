@@ -1,0 +1,6 @@
+{
+  "projects": { "default": "hapura-hq" },
+  "targets": {
+    "hapura-hq": { "hosting": { "hapura-hq": ["hapura-hq"] } }
+  }
+}

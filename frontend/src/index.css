@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+  background: #050508;
+  color: #e2e8f0;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0a12; }
+::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+@layer utilities {
+  /* Neon glow utilities */
+  .glow-brand   { box-shadow: 0 0 20px rgba(6,182,212,0.4),  0 0 60px rgba(6,182,212,0.15); }
+  .glow-green   { box-shadow: 0 0 20px rgba(0,255,136,0.4),  0 0 60px rgba(0,255,136,0.15); }
+  .glow-amber   { box-shadow: 0 0 20px rgba(255,170,0,0.4),  0 0 60px rgba(255,170,0,0.15); }
+  .glow-red     { box-shadow: 0 0 20px rgba(255,34,68,0.4),  0 0 60px rgba(255,34,68,0.15); }
+  .glow-purple  { box-shadow: 0 0 20px rgba(170,68,255,0.4), 0 0 60px rgba(170,68,255,0.15); }
+
+  .text-glow-brand  { text-shadow: 0 0 20px rgba(6,182,212,0.8); }
+  .text-glow-green  { text-shadow: 0 0 20px rgba(0,255,136,0.8); }
+  .text-glow-amber  { text-shadow: 0 0 20px rgba(255,170,0,0.8); }
+  .text-glow-purple { text-shadow: 0 0 20px rgba(170,68,255,0.8); }
+
+  /* Room card base */
+  .room-card {
+    @apply bg-dark-800 border border-dark-600 rounded-lg p-5 relative overflow-hidden
+           transition-all duration-300 hover:border-opacity-80;
+  }
+
+  /* Scanline overlay (CRT feel) */
+  .scanline::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+}
