@@ -69,7 +69,7 @@ function ReportModal({ agentId, onClose }: { agentId: string; onClose: () => voi
   )
 }
 
-function AgentCard({ agent, deptColor }: { agent: AgentDetail; deptColor: string }) {
+function AgentCard({ agent }: { agent: AgentDetail; deptColor?: string }) {
   const [showReport, setShowReport] = useState(false)
   const { mutate: trigger, isPending } = useTriggerAgent()
   const colorClass = COLOR_CLASSES[agent.color] ?? COLOR_CLASSES['brand']
