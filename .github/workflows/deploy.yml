@@ -151,7 +151,7 @@ jobs:
         run: |
           REGION=asia-southeast1
           PROJECT=hapura-hq
-          HEADERS="Content-Type:application/json,X-Scheduler-Secret:${SECRET}"
+          HEADERS="Content-Type=application/json,X-Scheduler-Secret=${SECRET}"
           BODY='{"triggered_by":"cloud_scheduler"}'
 
           upsert_job() {
