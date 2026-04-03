@@ -113,8 +113,6 @@ def run_bug_detection(triggered_by: str = "manual") -> dict:
         ),
         tools=[get_open_issues, save_bug_report],
         llm=llm,
-        verbose=False,
-        self_reflect=False,
     )
 
     issues_text = "\n".join([
@@ -135,6 +133,6 @@ Hãy:
         agent=agent,
     )
 
-    pipeline = Agents(agents=[agent], tasks=[task], verbose=False)
+    pipeline = Agents(agents=[agent], tasks=[task])
     result = pipeline.start()
     return {"result": str(result), "triggered_by": triggered_by}

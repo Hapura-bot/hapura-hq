@@ -116,8 +116,6 @@ def run_strategy_analysis(triggered_by: str = "schedule") -> dict:
         tools=[get_all_metrics, get_integration_data, get_project_list,
                save_strategy_report, send_strategy_alert],
         llm=llm,
-        verbose=False,
-        self_reflect=False,
     )
 
     task = Task(
@@ -134,7 +132,7 @@ Hãy:
         agent=agent,
     )
 
-    pipeline = Agents(agents=[agent], tasks=[task], verbose=False)
+    pipeline = Agents(agents=[agent], tasks=[task])
     result = pipeline.start()
 
     return {"result": str(result), "triggered_by": triggered_by}

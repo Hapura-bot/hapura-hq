@@ -94,8 +94,6 @@ def run_revenue_forecast(triggered_by: str = "schedule") -> dict:
         ),
         tools=[get_metric_history, save_forecast_report, send_forecast_alert],
         llm=llm,
-        verbose=False,
-        self_reflect=False,
     )
 
     task = Task(
@@ -112,6 +110,6 @@ Hãy:
         agent=agent,
     )
 
-    pipeline = Agents(agents=[agent], tasks=[task], verbose=False)
+    pipeline = Agents(agents=[agent], tasks=[task])
     result = pipeline.start()
     return {"result": str(result), "triggered_by": triggered_by}
