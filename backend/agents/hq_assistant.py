@@ -42,7 +42,11 @@ def _setup_openai():
     from config import get_settings
     from openai import OpenAI
     s = get_settings()
-    return OpenAI(api_key=s.openai_api_key, base_url=s.openai_base_url), s.model_aria
+    # Strip LiteLLM provider prefix — direct OpenAI client sends model name as-is to proxy
+    model = s.model_aria
+    if model.startswith("openai/"):
+        model = model[len("openai/"):]
+    return OpenAI(api_key=s.openai_api_key, base_url=s.openai_base_url), model
 
 
 def _get_context() -> str:
