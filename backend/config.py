@@ -23,21 +23,21 @@ class Settings(BaseSettings):
     # AI agents
     openai_api_key: str = ""
     openai_base_url: str = "https://vertex-key.com/api/v1"
-    llm_model: str = "openai/omega/claude-sonnet-4-6"
-    model_health_checker: str = "openai/lite/claude-haiku-4-5"
-    model_bug_detective: str = "openai/omega/claude-sonnet-4-6"
-    model_strategist: str = "openai/omega/claude-sonnet-4-6"
-    model_revenue_forecaster: str = "openai/omega/claude-opus-4-6"
+    llm_model: str = "openai/aws/claude-sonnet-4-6"
+    model_health_checker: str = "openai/aws/claude-haiku-4-5"
+    model_bug_detective: str = "openai/aws/claude-sonnet-4-6"
+    model_strategist: str = "openai/aws/claude-sonnet-4-6"
+    model_revenue_forecaster: str = "openai/aws/claude-opus-4-6"
     # Telegram
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
     telegram_webhook_secret: str = "aria-webhook-secret-change-me"
-    model_aria: str = "openai/omega/claude-sonnet-4-6"
+    model_aria: str = "openai/aws/claude-sonnet-4-6"
     # Workspace agents
-    model_director: str = "openai/omega/claude-opus-4-6"
-    model_aso_analyst: str = "openai/omega/claude-sonnet-4-6"
-    model_content_strategist: str = "openai/omega/claude-sonnet-4-6"
-    model_competitor_watcher: str = "openai/omega/claude-sonnet-4-6"
+    model_director: str = "openai/aws/claude-opus-4-6"
+    model_aso_analyst: str = "openai/aws/claude-sonnet-4-6"
+    model_content_strategist: str = "openai/aws/claude-sonnet-4-6"
+    model_competitor_watcher: str = "openai/aws/claude-sonnet-4-6"
 
     class Config:
         env_file = _ENV_FILE

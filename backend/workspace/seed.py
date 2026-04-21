@@ -51,10 +51,10 @@ CLIPPACK_CONFIG = {
         "cost_optimizer":     "0 9 1 * *",    # 1st of month
     },
     "llm_overrides": {
-        "director":           "omega/claude-opus-4-6",
-        "revenue_forecaster": "omega/claude-opus-4-6",
-        "health_checker":     "lite/claude-haiku-4-5",
-        "infra_monitor":      "lite/claude-haiku-4-5",
+        "director":           "aws/claude-opus-4-6",
+        "revenue_forecaster": "aws/claude-opus-4-6",
+        "health_checker":     "aws/claude-haiku-4-5",
+        "infra_monitor":      "aws/claude-haiku-4-5",
     },
     "meta": {
         "description": "ClipPack — Android video clip subscription app",
@@ -90,7 +90,7 @@ TRENDKR_CONFIG = {
     },
     "schedule_overrides": {},
     "llm_overrides": {
-        "director": "omega/claude-opus-4-6",
+        "director": "aws/claude-opus-4-6",
     },
     "meta": {
         "description": "Trendkr — Web trend monitoring platform",
