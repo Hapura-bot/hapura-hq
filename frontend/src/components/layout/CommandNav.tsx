@@ -1,14 +1,15 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Crosshair, BarChart3, Bot, Kanban, LogOut, Building2, FileText } from 'lucide-react'
+import { Crosshair, BarChart3, Bot, Kanban, LogOut, Building2, FileText, Zap } from 'lucide-react'
 import { useAuthContext } from '../../AuthContext'
 
 const NAV_LINKS = [
-  { to: '/',           icon: Crosshair,  label: 'WAR ROOM' },
-  { to: '/revenue',    icon: BarChart3,   label: 'REVENUE' },
-  { to: '/workplace',  icon: Building2,   label: 'WORKPLACE' },
-  { to: '/directives', icon: FileText,    label: 'DIRECTIVES' },
-  { to: '/agents',     icon: Bot,         label: 'AGENTS' },
-  { to: '/sprint',     icon: Kanban,      label: 'SPRINT' },
+  { to: '/',              icon: Crosshair,  label: 'WAR ROOM' },
+  { to: '/revenue',       icon: BarChart3,  label: 'REVENUE' },
+  { to: '/workplace',     icon: Building2,  label: 'WORKPLACE' },
+  { to: '/directives',    icon: FileText,   label: 'DIRECTIVES' },
+  { to: '/agents',        icon: Bot,        label: 'AGENTS' },
+  { to: '/sprint',        icon: Kanban,     label: 'SPRINT' },
+  { to: '/vertex-config', icon: Zap,        label: 'VERTEX' },
 ]
 
 export function CommandNav() {

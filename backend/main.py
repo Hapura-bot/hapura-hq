@@ -11,6 +11,7 @@ from api.routes.integrations import router as integrations_router
 from api.routes.agents import router as agents_router
 from api.routes.workspace import router as workspace_router
 from api.routes.scheduler import router as scheduler_router
+from api.routes.vertex_config import router as vertex_config_router
 
 settings = get_settings()
 
@@ -45,6 +46,7 @@ app.include_router(integrations_router, prefix="/api/v1")
 app.include_router(agents_router, prefix="/api/v1")
 app.include_router(workspace_router, prefix="/api/v1")
 app.include_router(scheduler_router, prefix="/api/v1")
+app.include_router(vertex_config_router, prefix="/api/v1")
 
 
 @app.get("/health")

@@ -11,6 +11,7 @@ import WorkplacePage from './pages/WorkplacePage'
 import DepartmentPage from './pages/DepartmentPage'
 import DirectivesPage from './pages/DirectivesPage'
 import LoginPage from './pages/LoginPage'
+import VertexConfigPage from './pages/VertexConfigPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1 } },
@@ -44,6 +45,7 @@ function AppShell() {
           <Route path="/directives"         element={<DirectivesPage />} />
           <Route path="/agents"            element={<AgentCouncilPage />} />
           <Route path="/sprint"            element={<SprintPage />} />
+          <Route path="/vertex-config"     element={<VertexConfigPage />} />
         </Routes>
       </div>
       <footer className="border-t border-dark-600 py-3 flex justify-center">
