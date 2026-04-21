@@ -122,14 +122,16 @@ def _doc_to_model(data: dict) -> VertexConfigDoc:
 
 
 def _write_history(db, project_id: str, doc: VertexConfigDoc, user_email: str):
-    """Append snapshot to history subcollection."""
+    """Append config snapshot to history subcollection.
+    Excludes operational fields (last_fetch_at) — history tracks config, not runtime state.
+    """
     history_ref = (
         db.collection(COLLECTION)
         .document(project_id)
         .collection("history")
         .document(str(doc.revision))
     )
-    payload = doc.model_dump()
+    payload = doc.model_dump(exclude={"last_fetch_at"})
     payload["updated_by"] = user_email
     payload["saved_at"] = _now_iso()
     history_ref.set(payload)
@@ -471,9 +473,13 @@ async def client_get_config(
     if default_ep and "OPENAI_BASE_URL" not in resolved:
         resolved.setdefault("VERTEX_BASE_URL", default_ep.base_url)
 
-    # Track last fetch time so the UI can show "online/offline" status
+    # Track last fetch time so the UI can show "online/offline" status.
+    # Non-fatal: a tracking failure must never block the SDK from getting its config.
     now = _now_iso()
-    db.collection(COLLECTION).document(project_id).update({"last_fetch_at": now})
+    try:
+        db.collection(COLLECTION).document(project_id).update({"last_fetch_at": now})
+    except Exception:
+        pass
 
     return {
         "project_id": project_id,
