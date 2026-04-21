@@ -1,14 +1,29 @@
+import { auth } from '../firebase'
+
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8099/api/v1'
 
+// Legacy token provider kept for compatibility — but we now always fall back
+// to auth.currentUser directly so there's no timing race on first render.
 let _getToken: (() => Promise<string>) | null = null
 export function setTokenProvider(fn: () => Promise<string>) { _getToken = fn }
 export function clearTokenProvider() { _getToken = null }
 
+async function _resolveToken(): Promise<string | null> {
+  try {
+    if (_getToken) return await _getToken()
+    // Fallback: read currentUser directly — avoids the useEffect timing race
+    // where TanStack Query fires before AuthProvider's effect has run.
+    const user = auth.currentUser
+    return user ? await user.getIdToken() : null
+  } catch {
+    return null
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (_getToken) {
-    try { headers['Authorization'] = `Bearer ${await _getToken()}` } catch { /* skip */ }
-  }
+  const token = await _resolveToken()
+  if (token) headers['Authorization'] = `Bearer ${token}`
   const res = await fetch(`${BASE}${path}`, {
     headers: { ...headers, ...(init?.headers as Record<string, string> ?? {}) },
     ...init,
