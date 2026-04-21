@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, Header, BackgroundTasks
 from firebase_admin import firestore
+from pydantic import BaseModel
 from config import get_settings
 from datetime import datetime, date
 
@@ -57,6 +58,33 @@ def _verify_secret(x_hapura_secret: str):
     settings = get_settings()
     if x_hapura_secret != settings.webhook_secret:
         raise HTTPException(status_code=401, detail="Invalid webhook secret")
+
+
+# ── Notify (outbound alert) ───────────────────────────────────────────────────
+
+class NotifyPayload(BaseModel):
+    message: str
+    level: str = "info"  # info | warning | error
+    source: str = ""     # e.g. "openclaw-sync", "hapudub", "hapu-studio"
+
+LEVEL_EMOJI = {"info": "ℹ️", "warning": "⚠️", "error": "🚨"}
+
+@router.post("/notify")
+async def notify(
+    body: NotifyPayload,
+    x_hapura_secret: str = Header(...),
+):
+    """Send an outbound Telegram alert to Victor. Auth: X-Hapura-Secret."""
+    _verify_secret(x_hapura_secret)
+    s = get_settings()
+    emoji = LEVEL_EMOJI.get(body.level, "ℹ️")
+    source_tag = f" `[{body.source}]`" if body.source else ""
+    text = f"{emoji}{source_tag}\n{body.message}"
+    from agents.telegram import send_telegram  # local import avoids circular
+    ok = await send_telegram(s.telegram_bot_token, s.telegram_chat_id, text)
+    if not ok:
+        raise HTTPException(status_code=502, detail="Telegram delivery failed")
+    return {"ok": True}
 
 
 @router.post("/revenue")
