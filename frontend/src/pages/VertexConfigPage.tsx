@@ -692,13 +692,11 @@ function ProjectEditor({
                 <p className="text-[10px] text-slate-600">POST endpoint, auth by client_token</p>
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Secret (Secret ref)</label>
-                <input
-                  className="input-field font-mono text-xs"
-                  value={webhook.secret_ref}
-                  onChange={e => setWebhook(p => ({ ...p, secret_ref: e.target.value }))}
-                  placeholder="MY_RELOAD_SECRET"
-                />
+                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Auth</label>
+                <p className="text-[11px] text-slate-400 py-1">
+                  Hub posts <code className="text-cyan-400">Authorization: Bearer &lt;client_token&gt;</code>.<br />
+                  Consumer checks it against <code className="text-cyan-400">VERTEX_CONFIG_TOKEN</code> env var.
+                </p>
               </div>
             </div>
           </div>

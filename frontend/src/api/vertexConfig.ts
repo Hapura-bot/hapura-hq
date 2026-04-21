@@ -14,7 +14,8 @@ export interface ModelEntry {
 
 export interface ReloadWebhook {
   url: string
-  secret_ref: string
+  // Auth uses client_token (same token the SDK uses to poll the hub).
+  // Rotate via /projects/{id}/regenerate-token.
 }
 
 export interface VertexConfigDoc {
@@ -92,4 +93,4 @@ export const DEFAULT_ENDPOINT: EndpointConfig = {
   api_key_ref: '',
 }
 
-export const DEFAULT_WEBHOOK: ReloadWebhook = { url: '', secret_ref: '' }
+export const DEFAULT_WEBHOOK: ReloadWebhook = { url: '' }
