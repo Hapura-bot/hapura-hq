@@ -296,8 +296,9 @@ async def rollback_config(
     current = _doc_to_model(cur_snap.to_dict())
     restored = _doc_to_model(old_data)
 
-    # Preserve token, bump revision
+    # Preserve operational fields (not part of config), bump revision
     restored.client_token = current.client_token
+    restored.last_fetch_at = current.last_fetch_at  # keep runtime status across rollbacks
     restored.revision = current.revision + 1
     restored.updated_at = _now_iso()
     restored.updated_by = uid
