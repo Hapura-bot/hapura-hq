@@ -336,8 +336,8 @@ async def test_connection(project_id: str, uid: str = Depends(get_current_user))
     if not endpoint_cfg:
         return TestConnectionResult(ok=False, error="No 'default' endpoint configured")
 
-    # Pick first model or haiku fallback
-    model_str = "omega/claude-haiku-4-5-20251001"
+    # Pick first model or haiku fallback (aws/ prefix = new vertex-key.com format)
+    model_str = "aws/claude-haiku-4-5"
     if doc.models:
         model_str = next(iter(doc.models.values())).value
 
