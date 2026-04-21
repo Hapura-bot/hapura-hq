@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Zap, Plus, RefreshCw, TestTube2, Pencil, Trash2, RotateCcw,
   ChevronRight, Clock, CheckCircle2, AlertTriangle, Loader2,
-  KeyRound, Copy, X, ChevronDown, ChevronUp,
+  Copy, X,
 } from 'lucide-react'
 import {
   vcApi,
@@ -12,7 +12,6 @@ import {
   type ModelEntry,
   type ReloadWebhook,
   type VertexConfigUpdate,
-  DEFAULT_ENDPOINT,
   DEFAULT_WEBHOOK,
 } from '../api/vertexConfig'
 
