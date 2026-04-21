@@ -3,6 +3,7 @@ Vertex Config Hub — API routes
 Quản lý tập trung endpoint + model config cho tất cả Hapura projects.
 """
 import secrets
+import time
 import httpx
 from datetime import datetime, timezone
 from typing import Optional
@@ -33,7 +34,8 @@ class ModelEntry(BaseModel):
 
 class ReloadWebhook(BaseModel):
     url: str = ""
-    secret_ref: str = ""
+    # Auth: hub sends client_token as Bearer — same token the SDK uses to poll the hub.
+    # No separate secret needed; rotate via /projects/{id}/regenerate-token.
 
 
 class VertexConfigDoc(BaseModel):
@@ -346,7 +348,6 @@ async def test_connection(project_id: str, uid: str = Depends(get_current_user))
         return TestConnectionResult(ok=False, error="Hub OPENAI_API_KEY not set in settings")
 
     base_url = endpoint_cfg.base_url.rstrip("/")
-    import time
     start = time.monotonic()
 
     try:
