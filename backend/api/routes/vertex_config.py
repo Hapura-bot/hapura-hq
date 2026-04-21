@@ -48,6 +48,7 @@ class VertexConfigDoc(BaseModel):
     revision: int = 1
     updated_at: str = ""
     updated_by: str = ""
+    last_fetch_at: str = ""   # updated by /client/{id} each time SDK polls
     client_token: str = ""
 
 
@@ -115,6 +116,7 @@ def _doc_to_model(data: dict) -> VertexConfigDoc:
         revision=data.get("revision", 1),
         updated_at=data.get("updated_at", ""),
         updated_by=data.get("updated_by", ""),
+        last_fetch_at=data.get("last_fetch_at", ""),
         client_token=data.get("client_token", ""),
     )
 
