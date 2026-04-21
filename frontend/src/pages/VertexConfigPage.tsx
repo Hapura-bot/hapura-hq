@@ -17,19 +17,29 @@ import {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
+// Health based on last_fetch_at (when consumer SDK last polled) not updated_at (config edit time)
 function HealthBadge({ doc }: { doc: VertexConfigDoc }) {
-  if (!doc.updated_at) return <span className="badge-gray text-xs px-2 py-0.5 rounded-full border border-dark-500 text-slate-600">no sync</span>
-  const mins = (Date.now() - new Date(doc.updated_at).getTime()) / 60000
-  if (mins < 2) return <span className="text-xs px-2 py-0.5 rounded-full bg-neon-green/10 border border-neon-green/25 text-neon-green font-semibold">healthy</span>
-  if (mins < 10) return <span className="text-xs px-2 py-0.5 rounded-full bg-neon-amber/10 border border-neon-amber/25 text-neon-amber font-semibold">stale</span>
-  return <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700/40 border border-dark-500 text-slate-500 font-semibold">old</span>
+  const ts = doc.last_fetch_at || doc.updated_at
+  if (!ts) return <span className="text-xs px-2 py-0.5 rounded-full border border-dark-500 text-slate-600">no sync</span>
+  const mins = (Date.now() - new Date(ts).getTime()) / 60000
+  if (doc.last_fetch_at) {
+    // Consumer is actively polling
+    if (mins < 2) return <span className="text-xs px-2 py-0.5 rounded-full bg-neon-green/10 border border-neon-green/25 text-neon-green font-semibold">online</span>
+    if (mins < 5) return <span className="text-xs px-2 py-0.5 rounded-full bg-neon-amber/10 border border-neon-amber/25 text-neon-amber font-semibold">syncing</span>
+    return <span className="text-xs px-2 py-0.5 rounded-full bg-red-900/20 border border-red-700/30 text-red-400 font-semibold">offline</span>
+  }
+  return <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700/40 border border-dark-500 text-slate-500 font-semibold">never synced</span>
 }
 
 function SyncDot({ doc }: { doc: VertexConfigDoc }) {
-  if (!doc.updated_at) return <span className="inline-block w-2 h-2 rounded-full bg-slate-700 mr-1.5" />
-  const mins = (Date.now() - new Date(doc.updated_at).getTime()) / 60000
-  if (mins < 2) return <span className="inline-block w-2 h-2 rounded-full bg-neon-green animate-pulse mr-1.5" />
-  if (mins < 10) return <span className="inline-block w-2 h-2 rounded-full bg-neon-amber mr-1.5" />
+  const ts = doc.last_fetch_at || doc.updated_at
+  if (!ts) return <span className="inline-block w-2 h-2 rounded-full bg-slate-700 mr-1.5" />
+  const mins = (Date.now() - new Date(ts).getTime()) / 60000
+  if (doc.last_fetch_at) {
+    if (mins < 2) return <span className="inline-block w-2 h-2 rounded-full bg-neon-green animate-pulse mr-1.5" />
+    if (mins < 5) return <span className="inline-block w-2 h-2 rounded-full bg-neon-amber animate-pulse mr-1.5" />
+    return <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1.5" />
+  }
   return <span className="inline-block w-2 h-2 rounded-full bg-slate-600 mr-1.5" />
 }
 
@@ -744,8 +754,8 @@ export default function VertexConfigPage() {
   })
 
   const healthy = configs.filter(c => {
-    if (!c.updated_at) return false
-    return (Date.now() - new Date(c.updated_at).getTime()) < 2 * 60 * 1000
+    if (!c.last_fetch_at) return false
+    return (Date.now() - new Date(c.last_fetch_at).getTime()) < 2 * 60 * 1000
   }).length
 
   // ── Editor view ──

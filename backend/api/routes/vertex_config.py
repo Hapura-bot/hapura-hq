@@ -469,9 +469,14 @@ async def client_get_config(
     if default_ep and "OPENAI_BASE_URL" not in resolved:
         resolved.setdefault("VERTEX_BASE_URL", default_ep.base_url)
 
+    # Track last fetch time so the UI can show "online/offline" status
+    now = _now_iso()
+    db.collection(COLLECTION).document(project_id).update({"last_fetch_at": now})
+
     return {
         "project_id": project_id,
         "revision": doc.revision,
         "updated_at": doc.updated_at,
+        "last_fetch_at": now,
         "config": resolved,
     }

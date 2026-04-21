@@ -28,6 +28,7 @@ export interface VertexConfigDoc {
   revision: number
   updated_at: string
   updated_by: string
+  last_fetch_at?: string   // set by hub when consumer SDK polls /client/{id}
   client_token: string
 }
 
