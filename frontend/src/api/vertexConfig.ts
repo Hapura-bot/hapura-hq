@@ -88,9 +88,4 @@ export const vcApi = {
 
 // ─── Defaults ─────────────────────────────────────────────────────────────
 
-export const DEFAULT_ENDPOINT: EndpointConfig = {
-  base_url: 'https://vertex-key.com/api/v1',
-  api_key_ref: '',
-}
-
 export const DEFAULT_WEBHOOK: ReloadWebhook = { url: '' }
