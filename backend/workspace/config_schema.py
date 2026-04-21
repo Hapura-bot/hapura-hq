@@ -15,7 +15,7 @@ class WorkspaceConfig(BaseModel):
     enabled_agents: dict[str, list[str]] = {}      # {"growth": ["aso_analyst", ...]}
     data_sources: dict[str, dict] = {}             # {"playstore": {"package_name": "..."}}
     schedule_overrides: dict[str, str] = {}        # {"aso_analyst": "0 8 * * 1"}
-    llm_overrides: dict[str, str] = {}             # {"director": "omega/claude-opus-4-6"}
+    llm_overrides: dict[str, str] = {}             # {"director": "aws/claude-opus-4-6"}
 
 
 class DepartmentMeta(BaseModel):

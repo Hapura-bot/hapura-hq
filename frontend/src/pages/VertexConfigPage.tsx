@@ -96,7 +96,7 @@ function AddProjectModal({
   const [baseUrl, setBaseUrl] = useState('https://vertex-key.com/api/v1')
   const [apiKeyRef, setApiKeyRef] = useState('')
   const [modelKey, setModelKey] = useState('')
-  const [modelVal, setModelVal] = useState('omega/claude-haiku-4-5-20251001')
+  const [modelVal, setModelVal] = useState('aws/claude-haiku-4-5')
   const [createdToken, setCreatedToken] = useState('')
 
   const create = useMutation({
@@ -560,7 +560,7 @@ function ProjectEditor({
             <span>🤖 Models</span>
             <button
               className="text-xs text-brand hover:text-brand/70 flex items-center gap-1 transition-colors"
-              onClick={() => setModels(p => ({ ...p, NEW_MODEL: { value: 'omega/claude-haiku-4-5-20251001', endpoint: 'default' } }))}
+              onClick={() => setModels(p => ({ ...p, NEW_MODEL: { value: 'aws/claude-haiku-4-5', endpoint: 'default' } }))}
             >
               <Plus size={11} /> Add model
             </button>

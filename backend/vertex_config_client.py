@@ -10,7 +10,7 @@ Dùng:
 
     # Thay os.getenv:
     base_url = vertex_config.get("OPENAI_BASE_URL", default="https://vertex-key.com/api/v1")
-    model    = vertex_config.get("MY_MODEL", default="omega/claude-haiku-4-5-20251001")
+    model    = vertex_config.get("MY_MODEL", default="aws/claude-haiku-4-5")
 """
 
 from __future__ import annotations
