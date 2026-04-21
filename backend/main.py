@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from config import get_settings
 from api.routes.projects import router as projects_router
@@ -37,6 +38,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_ALLOWED_PREFIXES = ("/api/v1/vertex-config", "/health")
+
+
+@app.middleware("http")
+async def maintenance_mode(request: Request, call_next):
+    if any(request.url.path.startswith(p) for p in _ALLOWED_PREFIXES):
+        return await call_next(request)
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "Service temporarily unavailable. Vertex Config Hub is still operational."},
+    )
 
 app.include_router(projects_router, prefix="/api/v1")
 app.include_router(metrics_router, prefix="/api/v1")
