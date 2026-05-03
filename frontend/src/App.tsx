@@ -12,6 +12,7 @@ import DepartmentPage from './pages/DepartmentPage'
 import DirectivesPage from './pages/DirectivesPage'
 import LoginPage from './pages/LoginPage'
 import VertexConfigPage from './pages/VertexConfigPage'
+import AutoSocialPage from './pages/AutoSocialPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1 } },
@@ -46,10 +47,11 @@ function AppShell() {
           <Route path="/agents"            element={<AgentCouncilPage />} />
           <Route path="/sprint"            element={<SprintPage />} />
           <Route path="/vertex-config"     element={<VertexConfigPage />} />
+          <Route path="/auto-social"       element={<AutoSocialPage />} />
         </Routes>
       </div>
       <footer className="border-t border-dark-600 py-3 flex justify-center">
-        <span className="text-xs font-mono text-slate-700 tracking-widest">HAPURA COMMAND CENTER v1.0</span>
+        <span className="text-xs font-mono text-slate-700 tracking-widest">HAPURA COMMAND CENTER v1.1</span>
       </footer>
       <ARIAChat />
     </div>

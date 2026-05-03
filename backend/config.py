@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     model_aso_analyst: str = "openai/aws/claude-sonnet-4-6"
     model_content_strategist: str = "openai/aws/claude-sonnet-4-6"
     model_competitor_watcher: str = "openai/aws/claude-sonnet-4-6"
+    # Auto-social module
+    buffer_api_key: str = ""
+    buffer_graphql_url: str = "https://api.buffer.com"
+    auto_social_admin_uids: str = ""
+    auto_social_default_channel_id: str = "69f5bb6f5c4c051afa015f6d"
+    gcs_assets_bucket: str = "hapura-hq-tiktok-assets"
 
     class Config:
         env_file = _ENV_FILE
