@@ -21,3 +21,6 @@ frontend/dist/
 .DS_Store
 *.log
 Thumbs.db
+
+# Claude Code per-machine session settings
+.claude/
