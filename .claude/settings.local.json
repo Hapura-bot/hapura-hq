@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:/Users/Admin/hapura-command/backend/workspace\")",
+      "Bash(mkdir -p \"C:/Users/Admin/hapura-command/backend/workspace/departments\")",
+      "Bash(mkdir -p \"C:/Users/Admin/hapura-command/backend/workspace/tools\")"
+    ]
+  }
+}
