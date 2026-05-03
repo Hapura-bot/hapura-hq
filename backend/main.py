@@ -13,6 +13,7 @@ from api.routes.agents import router as agents_router
 from api.routes.workspace import router as workspace_router
 from api.routes.scheduler import router as scheduler_router
 from api.routes.vertex_config import router as vertex_config_router
+from api.routes.auto_social import router as auto_social_router
 
 settings = get_settings()
 
@@ -27,7 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Hapura Command Center API",
     description="Revenue War Room — central management for all Hapura products",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
 
@@ -39,7 +40,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_ALLOWED_PREFIXES = ("/api/v1/vertex-config", "/health")
+_ALLOWED_PREFIXES = ("/api/v1/vertex-config", "/api/v1/auto-social", "/health")
 
 
 @app.middleware("http")
@@ -60,8 +61,9 @@ app.include_router(agents_router, prefix="/api/v1")
 app.include_router(workspace_router, prefix="/api/v1")
 app.include_router(scheduler_router, prefix="/api/v1")
 app.include_router(vertex_config_router, prefix="/api/v1")
+app.include_router(auto_social_router, prefix="/api/v1")
 
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "hapura-command", "version": "1.0.0"}
+    return {"status": "ok", "service": "hapura-command", "version": "1.1.0"}
