@@ -1,15 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuthContext } from './AuthContext'
 import { CommandNav } from './components/layout/CommandNav'
 import ARIAChat from './components/aria/ARIAChat'
-import DashboardPage from './pages/DashboardPage'
-import RevenueBoardPage from './pages/RevenueBoardPage'
-import AgentCouncilPage from './pages/AgentCouncilPage'
-import SprintPage from './pages/SprintPage'
-import WorkplacePage from './pages/WorkplacePage'
-import DepartmentPage from './pages/DepartmentPage'
-import DirectivesPage from './pages/DirectivesPage'
 import LoginPage from './pages/LoginPage'
 import VertexConfigPage from './pages/VertexConfigPage'
 import AutoSocialPage from './pages/AutoSocialPage'
@@ -39,15 +32,10 @@ function AppShell() {
       <CommandNav />
       <div className="flex-1">
         <Routes>
-          <Route path="/"        element={<DashboardPage />} />
-          <Route path="/revenue" element={<RevenueBoardPage />} />
-          <Route path="/workplace"          element={<WorkplacePage />} />
-          <Route path="/workplace/:deptId" element={<DepartmentPage />} />
-          <Route path="/directives"         element={<DirectivesPage />} />
-          <Route path="/agents"            element={<AgentCouncilPage />} />
-          <Route path="/sprint"            element={<SprintPage />} />
-          <Route path="/vertex-config"     element={<VertexConfigPage />} />
-          <Route path="/auto-social"       element={<AutoSocialPage />} />
+          <Route path="/"              element={<Navigate to="/vertex-config" replace />} />
+          <Route path="/vertex-config" element={<VertexConfigPage />} />
+          <Route path="/auto-social"   element={<AutoSocialPage />} />
+          <Route path="*"              element={<Navigate to="/vertex-config" replace />} />
         </Routes>
       </div>
       <footer className="border-t border-dark-600 py-3 flex justify-center">
