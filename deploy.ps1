@@ -43,7 +43,9 @@ Write-Host "Backend : $BackendUrl" -ForegroundColor Cyan
 Write-Host "Frontend: https://$ProjectId.web.app" -ForegroundColor Cyan
 
 # ── 4. Optional: Setup Cloud Scheduler ────────────────────────────────────────
-if ($SetupScheduler) {
+# War-room agent schedulers retired 2026-06-02 (dead behind maintenance 503 since Apr; stale /agents/schedule/* paths).
+# Guard hard-disabled to prevent zombie recreation. Restore via git history if agents are ever revived.
+if ($false -and $SetupScheduler) {
   $ApiBase = "$BackendUrl/api/v1"
   $Secret  = Read-Host "Enter WEBHOOK_SECRET (from backend .env)"
   Write-Host "`nCreating Cloud Scheduler jobs..." -ForegroundColor Yellow
